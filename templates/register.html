@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="auth-container">
+    <div class="auth-box">
+        <div style="text-align:center; margin-bottom:20px;">
+            <img src="/static/logo.svg" alt="Healix AI" width="80">
+            <h2 style="margin:10px 0 0 0; font-size:20px; color:#3B82F6;">HEALIX AI</h2>
+        </div>
+        <h2>Register</h2>
+        <form method="POST">
+            <div class="field">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div class="field">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <div class="field">
+                <label for="phone">Phone</label>
+                <input type="text" id="phone" name="phone" required>
+            </div>
+            <button type="submit" class="analyze-btn">Register</button>
+        </form>
+        <p>Already have an account? <a href="/login">Login</a></p>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,384 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="sidebar">
+    <div class="logo">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+        </svg>
+        HEALIX AI
+    </div>
+    <a href="/dashboard" class="nav-item active">Dashboard</a>
+    {% if username != 'Guest' %}
+    <a href="/history" class="nav-item">History</a>
+    <a href="/settings" class="nav-item">Settings</a>
+    {% endif %}
+    <div style="flex:1"></div>
+    {% if username != 'Guest' %}
+    <a href="/login" class="nav-item">Sign Out</a>
+    {% else %}
+    <a href="/login" class="nav-item">Login / Join</a>
+    {% endif %}
+</div>
+
+<div class="main-content">
+    <div class="header">
+        <h2>Your health risk prediction is ready.</h2>
+        <div style="display:flex; gap:15px; align-items:center;">
+            <button onclick="startListening()"
+                style="background:#334155; border:none; border-radius:50%; width:40px; height:40px; display:flex; align-items:center; justify-content:center; color:#38BDF8; cursor:pointer; transition:0.2s;"
+                title="Ask AI (Voice)">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+                    <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+                    <line x1="12" y1="19" x2="12" y2="23" />
+                    <line x1="8" y1="23" x2="16" y2="23" />
+                </svg>
+            </button>
+            <div
+                style="width:32px; height:32px; background:#334155; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#94A3B8;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                    <circle cx="12" cy="7" r="4" />
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mode Toggle -->
+    <div class="toggle-container">
+        <button class="toggle-btn active" onclick="setMode('inputs')" id="btn-inputs">Manual Inputs</button>
+        <button class="toggle-btn" onclick="setMode('chat')" id="btn-chat">Describe Symptoms</button>
+    </div>
+
+    <!-- Manual Inputs -->
+    <div id="input-section" class="input-grid">
+        <div class="field"><label>Age</label><input type="number" id="age" placeholder="45"></div>
+        <div class="field"><label>BMI</label><input type="number" id="bmi" placeholder="25"></div>
+        <div class="field"><label>Blood Pressure</label><input type="number" id="bp" placeholder="120"></div>
+        <div class="field"><label>Glucose</label><input type="number" id="glucose" placeholder="100"></div>
+        <div class="field"><label>Cholesterol</label><input type="number" id="chol" placeholder="180"></div>
+        <div class="field"><label>Max Heart Rate</label><input type="number" id="max_heart_rate" placeholder="150">
+        </div>
+        <div style="grid-column: 1 / -1;">
+            <button onclick="analyze()" class="analyze-btn">Predict Health Risk</button>
+        </div>
+    </div>
+
+    <!-- Chat / Symptom Input -->
+    <div id="chat-section" class="chat-area" style="display:none;">
+        <div
+            style="margin-bottom:20px; padding:15px; background:rgba(56, 189, 248, 0.05); border-radius:12px; border:1px dashed rgba(56, 189, 248, 0.2);">
+            <div
+                style="font-weight:600; color:var(--accent); margin-bottom:10px; display:flex; align-items:center; gap:8px;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                    <line x1="12" y1="17" x2="12.01" y2="17" />
+                </svg>
+                Quick Symptom Checker
+            </div>
+            <div id="questionnaire" style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                <!-- Questions will be injected here if we want dynamic, or hardcoded for speed -->
+                <div class="q-item" data-q="thirst"><span>Frequent Thirst?</span>
+                    <div class="q-btns"><button onclick="toggleQ(this, 1)">Yes</button><button
+                            onclick="toggleQ(this, 0)">No</button></div>
+                </div>
+                <div class="q-item" data-q="urination"><span>Frequent Urination?</span>
+                    <div class="q-btns"><button onclick="toggleQ(this, 1)">Yes</button><button
+                            onclick="toggleQ(this, 0)">No</button></div>
+                </div>
+                <div class="q-item" data-q="fatigue"><span>Feeling Tired?</span>
+                    <div class="q-btns"><button onclick="toggleQ(this, 1)">Yes</button><button
+                            onclick="toggleQ(this, 0)">No</button></div>
+                </div>
+                <div class="q-item" data-q="chest_pain"><span>Chest Pain?</span>
+                    <div class="q-btns"><button onclick="toggleQ(this, 1)">Yes</button><button
+                            onclick="toggleQ(this, 0)">No</button></div>
+                </div>
+                <div class="q-item" data-q="dizziness"><span>Dizziness?</span>
+                    <div class="q-btns"><button onclick="toggleQ(this, 1)">Yes</button><button
+                            onclick="toggleQ(this, 0)">No</button></div>
+                </div>
+                <div class="q-item" data-q="obesity"><span>Overweight?</span>
+                    <div class="q-btns"><button onclick="toggleQ(this, 1)">Yes</button><button
+                            onclick="toggleQ(this, 0)">No</button></div>
+                </div>
+            </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div style="margin-bottom:10px; font-weight:600; color:var(--text-main);">Additional Details (Optional)
+            </div>
+            <button onclick="startListening()"
+                style="background:transparent; border:none; color:var(--accent); cursor:pointer;"
+                title="Speak Symptoms">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+                    <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+                    <line x1="12" y1="19" x2="12" y2="23" />
+                    <line x1="8" y1="23" x2="16" y2="23" />
+                </svg>
+            </button>
+        </div>
+        <textarea id="symptoms" class="chat-input" placeholder="Describe anything else you feel..."></textarea>
+        <button onclick="analyze()" class="analyze-btn">Analyze & Predict Risk</button>
+    </div>
+
+    <!-- Results Area -->
+    <div id="result" class="results-container">
+        <!-- Javascript will inject Cards here -->
+    </div>
+</div>
+
+<script>
+    // --- Voice Assistant ---
+
+    function speak(text, lang = "en-US") {
+        if (!window.speechSynthesis) return;
+
+        // Cancel any current speaking
+        window.speechSynthesis.cancel();
+
+        const msg = new SpeechSynthesisUtterance(text);
+        const voices = window.speechSynthesis.getVoices();
+
+        // Try to find a specific female voice or fallback
+        const femaleVoice = voices.find(voice =>
+            voice.lang === lang &&
+            (
+                voice.name.toLowerCase().includes("zira") ||
+                voice.name.toLowerCase().includes("female") ||
+                voice.name.toLowerCase().includes("google") ||
+                voice.name.toLowerCase().includes("samantha") ||
+                voice.name.toLowerCase().includes("woman")
+            )
+        );
+
+        msg.voice = femaleVoice || voices.find(v => v.lang === lang) || voices[0];
+        msg.rate = 0.9;
+        msg.pitch = 1.1;
+        msg.volume = 1;
+
+        window.speechSynthesis.speak(msg);
+    }
+
+    function startListening() {
+        if (!('webkitSpeechRecognition' in window)) {
+            alert("Voice recognition not supported in this browser. Try Chrome.");
+            return;
+        }
+
+        // Auto-switch to chat mode to show transcript
+        setMode('chat');
+
+        const recognition = new webkitSpeechRecognition();
+        recognition.lang = "en-US"; // or 'te-IN' if Telugu preferred
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+
+        recognition.start();
+
+        // Visual cue logic could go here (e.g., animate mic)
+
+        recognition.onresult = function (event) {
+            const transcript = event.results[0][0].transcript;
+            const symptomsBox = document.getElementById("symptoms");
+
+            // Append or replace? Let's append with a space if not empty
+            if (symptomsBox.value.length > 0) {
+                symptomsBox.value += " " + transcript;
+            } else {
+                symptomsBox.value = transcript;
+            }
+
+            // Voice Command Parsing
+            if (transcript.toLowerCase().includes("analyze") || transcript.toLowerCase().includes("predict")) {
+                speak("Analyzing now.");
+                analyze();
+            } else {
+                speak("I heard: " + transcript);
+            }
+        };
+
+        recognition.onerror = function (event) {
+            console.error("Speech recognition error", event.error);
+            speak("I didn't catch that. Please try again.");
+        };
+    }
+
+    // Welcome Message
+    window.onload = function () {
+        // Wait slightly for voices to load
+        setTimeout(() => {
+            speak("Welcome to Healix AI. I am your personal health assistant of the generation.", "en-US");
+        }, 1000);
+    };
+
+    // --- Main App Logic ---
+
+    function setMode(mode) {
+        const inputSec = document.getElementById("input-section");
+        const chatSec = document.getElementById("chat-section");
+        const btnInput = document.getElementById("btn-inputs");
+        const btnChat = document.getElementById("btn-chat");
+
+        if (mode === 'inputs') {
+            inputSec.style.display = 'grid';
+            chatSec.style.display = 'none';
+            btnInput.classList.add('active');
+            btnChat.classList.remove('active');
+        } else {
+            inputSec.style.display = 'none';
+            chatSec.style.display = 'block';
+            btnInput.classList.remove('active');
+            btnChat.classList.add('active');
+        }
+    }
+
+    async function analyze() {
+        const msg = document.getElementById("symptoms").value;
+        // Collect Inputs
+        const payload = {
+            message: msg,
+            age: document.getElementById("age").value,
+            bmi: document.getElementById("bmi").value,
+            bp: document.getElementById("bp").value,
+            glucose: document.getElementById("glucose").value,
+            chol: document.getElementById("chol").value,
+            max_heart_rate: document.getElementById("max_heart_rate").value,
+            questionnaire: getQuestionnaireData()
+        };
+
+        const res = await fetch("/predict", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+
+        if (data.error) {
+            alert("Error: " + data.error);
+            speak("There was an error processing your request.");
+            return;
+        }
+
+        const resultDiv = document.getElementById("result");
+        resultDiv.style.display = "block";
+        resultDiv.innerHTML = `
+    <div class="risk-cards">
+        <div class="card diabetes">
+            <h3>Diabetes Risk</h3>
+            <div class="percentage">${data.diabetes}%</div>
+            <div class="status">${getRiskLabel(data.diabetes)}</div>
+        </div>
+        <div class="card heart">
+            <h3>Heart Disease Risk</h3>
+            <div class="percentage">${data.heart}%</div>
+            <div class="status">${getRiskLabel(data.heart)}</div>
+        </div>
+        <div class="card kidney">
+            <h3>Kidney Disease Risk</h3>
+            <div class="percentage">${data.kidney}%</div>
+            <div class="status">${getRiskLabel(data.kidney)}</div>
+        </div>
+    </div>
+
+    <div class="advice-box">
+        <div style="font-size:24px;">💡</div>
+        <div class="advice-content">
+            <h4>AI Recommendations:</h4>
+            <p>${data.recommendation || "Maintain a healthy lifestyle."}</p>
+        </div>
+    </div>
+
+    <!-- Future Risks Section -->
+    <div class="advice-box" style="border-left: 4px solid #ef4444; background: rgba(239, 68, 68, 0.1); margin-top: 10px;">
+        <div style="font-size:24px;">⚠️</div>
+        <div class="advice-content">
+            <h4 style="color: #ef4444;">Possible Future Complications:</h4>
+            <p>${data.future_risks || "No major risks identified."}</p>
+        </div>
+    </div>
+
+    <!-- Precautions Section -->
+    <div class="advice-box" style="border-left: 4px solid #10b981; background: rgba(16, 185, 129, 0.1); margin-top: 10px;">
+        <div style="font-size:24px;">🛡️</div>
+        <div class="advice-content">
+            <h4 style="color: #10b981;">Recommended Precautions:</h4>
+            <p style="white-space: pre-line;">${data.precautions || "None."}</p>
+        </div>
+    </div>
+
+    <div style="display:flex; gap:10px; margin-top:20px;">
+        <button onclick='downloadReport(${JSON.stringify(data)})' class="download-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download PDF
+        </button>
+        <button onclick='shareReport(${data.record_id})' class="download-btn" style="border-color:var(--accent); color:var(--accent);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+            Share Link
+        </button>
+    </div>
+    `;
+
+        // Speak the result summary
+        let summary = `Your analysis is ready. Diabetes risk is ${data.diabetes} percent. Heart risk is ${data.heart} percent. Kidney risk is ${data.kidney} percent. ${data.recommendation}`;
+        speak(summary);
+    }
+
+    // Questionnaire Logic
+    const qAnswers = {};
+    function toggleQ(btn, val) {
+        const parent = btn.parentElement;
+        const qKey = btn.closest('.q-item').dataset.q;
+
+        // Reset buttons in this group
+        parent.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        qAnswers[qKey] = val;
+    }
+
+    function getQuestionnaireData() {
+        return qAnswers;
+    }
+
+    function shareReport(id) {
+        const url = window.location.origin + "/report/" + id;
+        navigator.clipboard.writeText(url).then(() => {
+            alert("Link copied to clipboard: " + url);
+            speak("Link copied to clipboard.");
+        });
+    }
+
+    function getRiskLabel(percentage) {
+        if (percentage < 30) return "Low Risk";
+        if (percentage < 70) return "Moderate Risk";
+        return "High Risk";
+    }
+
+    async function downloadReport(data) {
+        const res = await fetch("/download_report", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        });
+
+        if (res.ok) {
+            const blob = await res.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = "healix_report.pdf";
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            speak("Report downloaded successfully.");
+        } else {
+            alert("Failed to generate report.");
+            speak("Failed to generate report.");
+        }
+    }
+</script>
+{% endblock %}

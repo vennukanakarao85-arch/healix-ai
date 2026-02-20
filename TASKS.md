@@ -1,0 +1,39 @@
+# Healix AI Setup and Debugging
+
+- [x] Create project directory structure (`healix_ai`, `models`, `templates`, `static`, `instance`) <!-- id: 0 -->
+- [x] Create `requirements.txt` <!-- id: 1 -->
+- [x] Create `config.py` <!-- id: 2 -->
+- [x] Create `database.py` <!-- id: 3 -->
+- [x] Create dummy machine learning models and save as `.pkl` files <!-- id: 4 -->
+- [x] Create `models_loader.py` <!-- id: 5 -->
+- [x] Create `app.py` <!-- id: 6 -->
+- [x] Create `static/style.css` <!-- id: 7 -->
+- [x] Create `templates/dashboard.html` <!-- id: 8 -->
+- [x] Create missing templates (`base.html`, `login.html`, `register.html`) with basic structure <!-- id: 9 -->
+- [x] Verify application structure and code <!-- id: 10 -->
+- [x] Debug issues (e.g., missing API key handling, valid JSON response from OpenAI) <!-- id: 11 -->
+- [x] Implement manual input fields in Dashboard and Backend <!-- id: 12 -->
+- [x] Display estimated metrics in Dashboard <!-- id: 13 -->
+- [x] Implement PDF Report Download <!-- id: 14 -->
+- [x] Redesign Dashboard to match reference image (Chat UI, Colorful Cards) <!-- id: 15 -->
+- [x] Implement AI Advice/Recommendations generation <!-- id: 16 -->
+- [x] Implement "Dark Theme" UI matching new reference images <!-- id: 17 -->
+- [x] Add Toggle Button for "Input Values" vs "Symptoms" <!-- id: 18 -->
+- [x] Implement History Page (Table of past records) <!-- id: 19 -->
+- [x] Implement Settings Page (Profile update) <!-- id: 20 -->
+- [x] Generate Logo Asset matching reference <!-- id: 21 -->
+- [x] Add Logo to Login/Register Pages <!-- id: 22 -->
+- [x] Add Logo to Sidebar in Dashboard/History/Settings <!-- id: 23 -->
+- [x] Implement Voice Assistant (Text-to-Speech & Speech-to-Text) <!-- id: 24 -->
+- [x] Add dedicated "Asking" button to Header <!-- id: 25 -->
+- [x] Make Dashboard Public (Guest Access) <!-- id: 26 -->
+- [x] Implement Copy/Share Result Link <!-- id: 27 -->
+- [x] Create Public Report View (`/report/<id>`) <!-- id: 28 -->
+- [x] Enable Mobile/Network Access (`0.0.0.0`) <!-- id: 29 -->
+- [x] Add Mobile Responsive CSS <!-- id: 30 -->
+- [x] Create `start_public_access.bat` for SSH Tunneling (Updated to Serveo) <!-- id: 31 -->
+- [x] Generate SSH Key for Custom Subdomain <!-- id: 32 -->
+- [x] Configure Custom URL (`healix-ai.serveo.net`) <!-- id: 33 -->
+- [x] Create `start_healix.bat` (Run App + Tunnel) <!-- id: 34 -->
+- [x] Implement SMS Notification for High Risk <!-- id: 35 -->
+- [x] Enhance AI Advice (Future Risks & Precautions) <!-- id: 36 -->

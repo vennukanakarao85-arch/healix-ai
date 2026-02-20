@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+env/
+.env
+
+# Flask/SQLAlchemy
+instance/
+*.db
+*.log
+
+# IDEs
+.vscode/
+.idea/
+
+# Local Public Access
+public_url.txt
+healix_key
+healix_key.pub
+serveo.log
+lh.log
+*.bak

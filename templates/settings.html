@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="sidebar">
+    <div class="logo">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+        </svg>
+        HEALIX AI
+    </div>
+    <a href="/dashboard" class="nav-item">Dashboard</a>
+    <a href="/history" class="nav-item">History</a>
+    <a href="/settings" class="nav-item active">Settings</a>
+    <div style="flex:1"></div>
+    <a href="/login" class="nav-item">Sign Out</a>
+</div>
+
+<div class="main-content">
+    <div class="header">
+        <h2>Account Settings</h2>
+        <div style="display:flex; gap:10px; align-items:center;">
+            <span style="color:var(--text-muted);">{{ username }}</span>
+            <div
+                style="width:32px; height:32px; background:#334155; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#94A3B8;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                    <circle cx="12" cy="7" r="4" />
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    {% if message %}
+    <div
+        style="background: rgba(74, 222, 128, 0.2); color: #4ADE80; padding: 12px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #4ADE80;">
+        {{ message }}
+    </div>
+    {% endif %}
+
+    <div
+        style="background:var(--bg-card); padding:24px; border-radius:12px; max-width:500px; border:1px solid #374151;">
+        <h3 style="color:var(--text-main); margin-top:0;">Update Profile</h3>
+        <form method="POST">
+            <div class="field" style="margin-bottom:15px;">
+                <label>Username</label>
+                <input type="text" value="{{ user.username }}" disabled style="opacity:0.7; cursor:not-allowed;">
+            </div>
+
+            <div class="field" style="margin-bottom:15px;">
+                <label for="phone">Phone Number</label>
+                <input type="text" id="phone" name="phone" value="{{ user.phone }}">
+            </div>
+
+            <div class="field" style="margin-bottom:20px;">
+                <label for="password">New Password</label>
+                <input type="password" id="password" name="password" placeholder="Leave blank to keep current">
+            </div>
+
+            <button type="submit" class="analyze-btn">Save Changes</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

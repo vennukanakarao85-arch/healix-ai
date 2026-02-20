@@ -1,0 +1,11 @@
+Flask
+Flask-Login
+Flask-SQLAlchemy
+openai
+scikit-learn
+joblib
+reportlab
+python-dotenv
+twilio
+firebase-admin
+gunicorn
