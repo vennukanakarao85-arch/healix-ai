@@ -165,11 +165,14 @@ def predict():
         Symptoms to extract: thirst, urination, fatigue, chest_pain, dizziness, obesity, blurred_vision, slow_healing, numbness, breath_shortness, swollen_legs, palpitations, foamy_urine, itchy_skin, muscle_cramps.
         
         Fields to provide (in {target_lang}):
-        1. 'recommendation': Specific advice (max 30 words).
+        1. 'recommendation': Risk-based advice (max 30 words). 
+           - LOW risk: Focus on maintenance and preventive health.
+           - MODERATE risk: Focus on lifestyle changes and scheduling a checkup.
+           - HIGH risk: Urgent medical consultation.
         2. 'future_risks': Potential complications (max 20 words).
         3. 'precautions': Actionable steps (max 3 bullet points).
         4. 'causes': Medical/lifestyle reasons (max 30 words).
-        5. 'reduction_steps': Steps to lower risk (max 3 bullet points).
+        5. 'reduction_steps': Steps to lower risk proportional to risk level.
         6. 'diet_plan': Recommended foods (max 30 words).
         7. 'diabetes_risk', 'heart_risk', 'kidney_risk': Percentages (0-100).
         
@@ -183,40 +186,40 @@ def predict():
             if client.api_key == "dummy-key":
                 import random
                 
-                # Mock localized advice
+                # Mock localized advice (Risk-based)
                 mock_advice = {
                     "en-US": {
-                        "rec": "Based on your symptoms, consult a doctor immediately.",
-                        "risk": "Untreated symptoms may lead to chronic diseases.",
-                        "pre": "1. Better diet.\n2. Exercise.\n3. Regular monitoring.",
-                        "cause": "Lifestyle factors or genetic predisposition.",
-                        "red": "1. Healthy habits.\n2. Routine checks.",
-                        "diet": "Eat balanced, whole foods."
+                        "low": {"rec": "Your risk levels are low. Maintain a balanced diet and regular exercise.", "red": "1. Stay active.\n2. Eat greens.\n3. Annual wellness check."},
+                        "high": {"rec": "High risk detected. Consult a doctor immediately for a detailed screening.", "red": "1. Immediate consultation.\n2. Diagnostic tests.\n3. Medication review."}
                     },
                     "hi-IN": {
-                        "rec": "आपके लक्षणों के आधार पर, तुरंत डॉक्टर से परामर्श लें।",
-                        "risk": "अनुपचारित लक्षणों से पुरानी बीमारियां हो सकती हैं।",
-                        "pre": "1. बेहतर आहार।\n2. व्यायाम।\n3. नियमित निगरानी।",
-                        "cause": "जीवनशैली के कारक या आनुवंशिक प्रवृत्ति।",
-                        "red": "1. स्वस्थ आदतें।\n2. नियमित जांच।",
-                        "diet": "संतुलित, संपूर्ण आहार लें।"
+                        "low": {"rec": "आपका जोखिम स्तर कम है। संतुलित आहार और नियमित व्यायाम बनाए रखें।", "red": "1. सक्रिय रहें।\n2. हरी सब्जियां खाएं।\n3. वार्षिक स्वास्थ्य जांच।"},
+                        "high": {"rec": "उच्च जोखिम का पता चला। विस्तृत जांच के लिए तुरंत डॉक्टर से सलाह लें।", "red": "1. तत्काल परामर्श।\n2. नैदानिक परीक्षण।\n3. दवा की समीक्षा।"}
                     },
                     "te-IN": {
-                        "rec": "మీ లక్షణాల ఆధారంగా, వెంటనే వైద్యుడిని సంప్రదించండి.",
-                        "risk": "చికిత్స చేయని లక్షణాలు దీర్ఘకాలిక వ్యాధులకు దారితీయవచ్చు.",
-                        "pre": "1. మంచి ఆహారం.\n2. వ్యాయామం.\n3. క్రమం తప్పకుండా పర్యవేక్షణ.",
-                        "cause": "జీవనశైలి కారకాలు లేదా జన్యు సిద్ధత.",
-                        "red": "1. ఆరోగ్యకరమైన అలవాట్లు.\n2. క్రమం తప్పకుండా తనిఖీలు.",
-                        "diet": "సమతుల్యమైన, సంపూర్ణ ఆహారం తీసుకోండి."
+                        "low": {"rec": "మీ ప్రమాద స్థాయిలు తక్కువగా ఉన్నాయి. సమతుల్య ఆహారం మరియు క్రమం తప్పకుండా వ్యాయామం చేయండి.", "red": "1. యాక్టివ్ గా ఉండండి.\n2. ఆకుకూరలు తినండి.\n3. వార్షిక ఆరోగ్య పరీక్ష."},
+                        "high": {"rec": "అధిక ప్రమాదం గుర్తించబడింది. వివరణాత్మక స్క్రీనింగ్ కోసం వెంటనే వైద్యుడిని సంప్రదించండి.", "red": "1. తక్షణ సంప్రదింపు.\n2. రోగనిర్ధారణ పరీక్షలు.\n3. మందుల సమీక్ష."}
                     }
                 }
-                curr_advice = mock_advice.get(lang_code, mock_advice["en-US"])
+                
+                # Mock symptoms logic
+                s_thirst = q_data.get("thirst", random.choice([0, 1]))
+                s_chest = q_data.get("chest_pain", random.choice([0, 1]))
+                
+                d_risk = random.randint(60, 95) if s_thirst else random.randint(5, 30)
+                h_risk = random.randint(60, 95) if s_chest else random.randint(5, 30)
+                k_risk = random.randint(5, 40)
+                
+                is_high = any(r > 60 for r in [d_risk, h_risk, k_risk])
+                risk_level = "high" if is_high else "low"
+                
+                curr_advice = mock_advice.get(lang_code, mock_advice["en-US"])[risk_level]
 
                 symptoms = {
-                    "thirst": q_data.get("thirst", random.choice([0, 1])),
+                    "thirst": s_thirst,
                     "urination": q_data.get("urination", random.choice([0, 1])),
                     "fatigue": q_data.get("fatigue", random.choice([0, 1])),
-                    "chest_pain": q_data.get("chest_pain", random.choice([0, 1])),
+                    "chest_pain": s_chest,
                     "dizziness": q_data.get("dizziness", random.choice([0, 1])),
                     "obesity": q_data.get("obesity", random.choice([0, 1])),
                     "blurred_vision": q_data.get("blurred_vision", random.choice([0, 1])),
@@ -229,14 +232,14 @@ def predict():
                     "itchy_skin": q_data.get("itchy_skin", random.choice([0, 1])),
                     "muscle_cramps": q_data.get("muscle_cramps", random.choice([0, 1])),
                     "recommendation": curr_advice["rec"],
-                    "future_risks": curr_advice["risk"],
-                    "precautions": curr_advice["pre"],
-                    "causes": curr_advice["cause"],
+                    "future_risks": "Complications depend on lifestyle choices.",
+                    "precautions": "Monitor vitals regularly.",
+                    "causes": "May include environmental and genetic factors.",
                     "reduction_steps": curr_advice["red"],
-                    "diet_plan": curr_advice["diet"],
-                    "diabetes_risk": random.randint(30, 85) if any([q_data.get(k) for k in ["thirst", "urination", "blurred_vision"]]) else random.randint(5, 40),
-                    "heart_risk": random.randint(30, 85) if any([q_data.get(k) for k in ["chest_pain", "breath_shortness"]]) else random.randint(5, 40),
-                    "kidney_risk": random.randint(30, 85) if any([q_data.get(k) for k in ["fatigue", "foamy_urine"]]) else random.randint(5, 40)
+                    "diet_plan": "Specific diet based on your risk profile.",
+                    "diabetes_risk": d_risk,
+                    "heart_risk": h_risk,
+                    "kidney_risk": k_risk
                 }
             else:
                 response = client.chat.completions.create(
@@ -282,11 +285,35 @@ def predict():
         except Exception as e:
             print(f"Error calling AI: {e}")
     else:
-        future_risks = "Based on risk levels, untreated conditions may worsen."
-        precautions = "Maintain a balanced diet and exercise regularly."
-        causes = "Further diagnosis required for specific causes."
-        reduction_steps = "Standard health optimization requested."
-        diet_plan = "Universal healthy diet recommended."
+        defaults = {
+            "en-US": {
+                "risk": "Based on risk levels, untreated conditions may worsen.",
+                "pre": "Maintain a balanced diet and exercise regularly.",
+                "cause": "Further diagnosis required for specific causes.",
+                "red": "Standard health optimization requested.",
+                "diet": "Universal healthy diet recommended."
+            },
+            "hi-IN": {
+                "risk": "जोखिम के स्तरों के आधार पर, अनुपचारित स्थितियां खराब हो सकती हैं।",
+                "pre": "संतुलित आहार बनाए रखें और नियमित व्यायाम करें।",
+                "cause": "विशिष्ट कारणों के लिए और निदान की आवश्यकता है।",
+                "red": "मानक स्वास्थ्य अनुकूलन का अनुरोध किया गया।",
+                "diet": "सार्वभौमिक स्वास्थ्य आहार की सिफारिश की गई।"
+            },
+            "te-IN": {
+                "risk": "ప్రమాద స్థాయిల ఆధారంగా, చికిత్స చేయని పరిస్థితులు అధ్వాన్నంగా మారవచ్చు.",
+                "pre": "సమతుల్య ఆహారం తీసుకోండి మరియు క్రమం తప్పకుండా వ్యాయామం చేయండి.",
+                "cause": "నిర్దిష్ట కారణాల కోసం మరిన్ని పరీక్షలు అవసరం.",
+                "red": "ప్రామాణిక ఆరోగ్య ఆప్టిమైజేషన్ అభ్యర్థించబడింది.",
+                "diet": "సార్వత్రిక ఆరోగ్యకరమైన ఆహారం సిఫార్సు చేయబడింది."
+            }
+        }
+        curr_defaults = defaults.get(lang_code, defaults["en-US"])
+        future_risks = curr_defaults["risk"]
+        precautions = curr_defaults["pre"]
+        causes = curr_defaults["cause"]
+        reduction_steps = curr_defaults["red"]
+        diet_plan = curr_defaults["diet"]
 
     # Prediction Logic Selection
     if not has_manual and ai_risks:

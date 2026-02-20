@@ -87,63 +87,63 @@
             </div>
             <div id="questionnaire" style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
                 <!-- Questions will be injected here if we want dynamic, or hardcoded for speed -->
-                <div class="q-item" data-q="thirst"><span>Frequent Thirst?</span>
+                <div class="q-item" data-q="thirst"><span class="q-label">Frequent Thirst?</span>
                     <div class="q-btns"><button onclick="toggleQ(this, 1)">Yes</button><button
                             onclick="toggleQ(this, 0)">No</button></div>
                 </div>
-                <div class="q-item" data-q="urination"><span>Frequent Urination?</span>
+                <div class="q-item" data-q="urination"><span class="q-label">Frequent Urination?</span>
                     <div class="q-btns"><button onclick="toggleQ(this, 1)">Yes</button><button
                             onclick="toggleQ(this, 0)">No</button></div>
                 </div>
-                <div class="q-item" data-q="fatigue"><span>Feeling Tired?</span>
+                <div class="q-item" data-q="fatigue"><span class="q-label">Feeling Tired?</span>
                     <div class="q-btns"><button onclick="toggleQ(this, 1)">Yes</button><button
                             onclick="toggleQ(this, 0)">No</button></div>
                 </div>
-                <div class="q-item" data-q="blurred_vision"><span>Blurred Vision?</span>
+                <div class="q-item" data-q="blurred_vision"><span class="q-label">Blurred Vision?</span>
                     <div class="q-btns"><button onclick="toggleQ(this, 1)">Yes</button><button
                             onclick="toggleQ(this, 0)">No</button></div>
                 </div>
-                <div class="q-item" data-q="slow_healing"><span>Slow Healing Sores?</span>
+                <div class="q-item" data-q="slow_healing"><span class="q-label">Slow Healing Sores?</span>
                     <div class="q-btns"><button onclick="toggleQ(this, 1)">Yes</button><button
                             onclick="toggleQ(this, 0)">No</button></div>
                 </div>
-                <div class="q-item" data-q="numbness"><span>Hand/Foot Numbness?</span>
+                <div class="q-item" data-q="numbness"><span class="q-label">Hand/Foot Numbness?</span>
                     <div class="q-btns"><button onclick="toggleQ(this, 1)">Yes</button><button
                             onclick="toggleQ(this, 0)">No</button></div>
                 </div>
-                <div class="q-item" data-q="chest_pain"><span>Chest Pain?</span>
+                <div class="q-item" data-q="chest_pain"><span class="q-label">Chest Pain?</span>
                     <div class="q-btns"><button onclick="toggleQ(this, 1)">Yes</button><button
                             onclick="toggleQ(this, 0)">No</button></div>
                 </div>
-                <div class="q-item" data-q="breath_shortness"><span>Shortness of Breath?</span>
+                <div class="q-item" data-q="breath_shortness"><span class="q-label">Shortness of Breath?</span>
                     <div class="q-btns"><button onclick="toggleQ(this, 1)">Yes</button><button
                             onclick="toggleQ(this, 0)">No</button></div>
                 </div>
-                <div class="q-item" data-q="swollen_legs"><span>Swollen Legs/Feet?</span>
+                <div class="q-item" data-q="swollen_legs"><span class="q-label">Swollen Legs/Feet?</span>
                     <div class="q-btns"><button onclick="toggleQ(this, 1)">Yes</button><button
                             onclick="toggleQ(this, 0)">No</button></div>
                 </div>
-                <div class="q-item" data-q="palpitations"><span>Heart Palpitations?</span>
+                <div class="q-item" data-q="palpitations"><span class="q-label">Heart Palpitations?</span>
                     <div class="q-btns"><button onclick="toggleQ(this, 1)">Yes</button><button
                             onclick="toggleQ(this, 0)">No</button></div>
                 </div>
-                <div class="q-item" data-q="foamy_urine"><span>Foamy Urine?</span>
+                <div class="q-item" data-q="foamy_urine"><span class="q-label">Foamy Urine?</span>
                     <div class="q-btns"><button onclick="toggleQ(this, 1)">Yes</button><button
                             onclick="toggleQ(this, 0)">No</button></div>
                 </div>
-                <div class="q-item" data-q="itchy_skin"><span>Persistent Itchy Skin?</span>
+                <div class="q-item" data-q="itchy_skin"><span class="q-label">Persistent Itchy Skin?</span>
                     <div class="q-btns"><button onclick="toggleQ(this, 1)">Yes</button><button
                             onclick="toggleQ(this, 0)">No</button></div>
                 </div>
-                <div class="q-item" data-q="muscle_cramps"><span>Frequent Muscle Cramps?</span>
+                <div class="q-item" data-q="muscle_cramps"><span class="q-label">Frequent Muscle Cramps?</span>
                     <div class="q-btns"><button onclick="toggleQ(this, 1)">Yes</button><button
                             onclick="toggleQ(this, 0)">No</button></div>
                 </div>
-                <div class="q-item" data-q="dizziness"><span>Dizziness?</span>
+                <div class="q-item" data-q="dizziness"><span class="q-label">Dizziness?</span>
                     <div class="q-btns"><button onclick="toggleQ(this, 1)">Yes</button><button
                             onclick="toggleQ(this, 0)">No</button></div>
                 </div>
-                <div class="q-item" data-q="obesity"><span>Overweight?</span>
+                <div class="q-item" data-q="obesity"><span class="q-label">Overweight?</span>
                     <div class="q-btns"><button onclick="toggleQ(this, 1)">Yes</button><button
                             onclick="toggleQ(this, 0)">No</button></div>
                 </div>
@@ -251,11 +251,91 @@
         };
     }
 
-    // Welcome Message
+    // Welcome Message & Localization
     window.onload = function () {
-        // Wait slightly for voices to load
+        const langSelect = document.getElementById("language-select");
+        const translations = {
+            "en-US": {
+                welcome: "Welcome to Healix AI. I am your personal health assistant of the generation.",
+                labels: {
+                    thirst: "Frequent Thirst?",
+                    urination: "Frequent Urination?",
+                    fatigue: "Feeling Tired?",
+                    blurred_vision: "Blurred Vision?",
+                    slow_healing: "Slow Healing Sores?",
+                    numbness: "Hand/Foot Numbness?",
+                    chest_pain: "Chest Pain?",
+                    breath_shortness: "Shortness of Breath?",
+                    swollen_legs: "Swollen Legs/Feet?",
+                    palpitations: "Heart Palpitations?",
+                    foamy_urine: "Foamy Urine?",
+                    itchy_skin: "Persistent Itchy Skin?",
+                    muscle_cramps: "Frequent Muscle Cramps?",
+                    dizziness: "Dizziness?",
+                    obesity: "Overweight?"
+                }
+            },
+            "hi-IN": {
+                welcome: "हीलिक्स एआई में आपका स्वागत है। मैं आपकी पीढ़ी का निजी स्वास्थ्य सहायक हूं।",
+                labels: {
+                    thirst: "क्या आपको बार-बार प्यास लगती है?",
+                    urination: "क्या आपको बार-बार पेशाब आता है?",
+                    fatigue: "क्या आप थकान महसूस कर रहे हैं?",
+                    blurred_vision: "क्या आपको धुंधला दिखाई देता है?",
+                    slow_healing: "क्या घाव भरने में समय लगता है?",
+                    numbness: "हाथ-पैर में सुन्नपन?",
+                    chest_pain: "सीने में दर्द?",
+                    breath_shortness: "सांस लेने में तकलीफ?",
+                    swollen_legs: "पैरों में सूजन?",
+                    palpitations: "दिल की धड़कन तेज होना?",
+                    foamy_urine: "झागदार पेशाब?",
+                    itchy_skin: "लगातार खुजली वाली त्वचा?",
+                    muscle_cramps: "बार-बार मांसपेशियों में ऐंठन?",
+                    dizziness: "चक्कर आना?",
+                    obesity: "अधिक वजन?"
+                }
+            },
+            "te-IN": {
+                welcome: "హీలిక్స్ AIకి స్వాగతం. నేను మీ వ్యక్తిగత ఆరోగ్య సహాయకుడిని.",
+                labels: {
+                    thirst: "మీకు తరచుగా దాహం వేస్తుందా?",
+                    urination: "తరచుగా మూత్ర విసర్జన అవుతుందా?",
+                    fatigue: "అలసటగా ఉందా?",
+                    blurred_vision: "చూపు మసకగా ఉందా?",
+                    slow_healing: "గాయాలు నెమ్మదిగా నయమవుతున్నాయా?",
+                    numbness: "చేతులు/కాళ్లు తిమ్మిర్లు ఎక్కుతున్నాయా?",
+                    chest_pain: "ఛాతీ నొప్పి ఉందా?",
+                    breath_shortness: "శ్వాస తీసుకోవడంలో ఇబ్బందిగా ఉందా?",
+                    swollen_legs: "కాళ్ల వాపులు ఉన్నాయా?",
+                    palpitations: "గుండె దడగా ఉందా?",
+                    foamy_urine: "మూత్రంలో నురుగు వస్తుందా?",
+                    itchy_skin: "నిరంతర చర్మ దురద ఉందా?",
+                    muscle_cramps: "తరచుగా కండరాల తిమ్మిర్లు వస్తున్నాయా?",
+                    dizziness: "తల తిరుగుతున్నట్లు ఉందా?",
+                    obesity: "అధిక బరువు ఉన్నారా?"
+                }
+            }
+        };
+
+        function applyTranslations() {
+            const lang = langSelect.value;
+            const t = translations[lang];
+            // Update Symptom Labels
+            document.querySelectorAll(".q-item").forEach(item => {
+                const key = item.dataset.q;
+                const labelSpan = item.querySelector(".q-label");
+                if (labelSpan && t.labels[key]) {
+                    labelSpan.textContent = t.labels[key];
+                }
+            });
+            speak(t.welcome, lang);
+        }
+
+        langSelect.onchange = applyTranslations;
+
+        // Initial welcome
         setTimeout(() => {
-            speak("Welcome to Healix AI. I am your personal health assistant of the generation.", "en-US");
+            applyTranslations();
         }, 1000);
     };
 
