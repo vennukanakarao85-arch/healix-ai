@@ -24,6 +24,14 @@
     <div class="header">
         <h2>Your health risk prediction is ready.</h2>
         <div style="display:flex; gap:15px; align-items:center;">
+            <!-- Language Selector -->
+            <select id="language-select"
+                style="background:#334155; color:white; border:none; border-radius:8px; padding:8px 12px; cursor:pointer; font-weight:600; font-family:inherit;">
+                <option value="en-US">English</option>
+                <option value="hi-IN">हिन्दी (Hindi)</option>
+                <option value="te-IN">తెలుగు (Telugu)</option>
+            </select>
+
             <button onclick="startListening()"
                 style="background:#334155; border:none; border-radius:50%; width:40px; height:40px; display:flex; align-items:center; justify-content:center; color:#38BDF8; cursor:pointer; transition:0.2s;"
                 title="Ask AI (Voice)">
@@ -207,8 +215,9 @@
         // Auto-switch to chat mode to show transcript
         setMode('chat');
 
+        const selectedLang = document.getElementById("language-select").value;
         const recognition = new webkitSpeechRecognition();
-        recognition.lang = "en-US"; // or 'te-IN' if Telugu preferred
+        recognition.lang = selectedLang;
         recognition.interimResults = false;
         recognition.maxAlternatives = 1;
 
@@ -276,6 +285,7 @@
         // Collect Inputs
         const payload = {
             message: msg,
+            language: document.getElementById("language-select").value,
             age: document.getElementById("age").value,
             bmi: document.getElementById("bmi").value,
             bp: document.getElementById("bp").value,

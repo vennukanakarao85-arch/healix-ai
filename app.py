@@ -138,6 +138,18 @@ def predict():
     # Extract questionnaire answers
     q_data = data.get("questionnaire", {})
     
+    # Extract questionnaire and language
+    q_data = data.get("questionnaire", {})
+    lang_code = data.get("language", "en-US")
+    
+    # Map language code to human names for GPT
+    lang_map = {
+        "en-US": "English",
+        "hi-IN": "Hindi",
+        "te-IN": "Telugu"
+    }
+    target_lang = lang_map.get(lang_code, "English")
+
     # If message is present OR questionnaire is present, use NLP to adjust/predict
     recommendation = "Maintain a healthy lifestyle." 
     ai_risks = {}
@@ -145,30 +157,61 @@ def predict():
     if (message and len(message.strip()) > 2) or q_data:
         q_text = ", ".join([f"{k}: {'Yes' if v == 1 else 'No'}" for k, v in q_data.items()])
         prompt = f"""
-        Extract 0 or 1 values for:
-        thirst, urination, fatigue, chest_pain, dizziness, obesity, 
-        blurred_vision, slow_healing, numbness, breath_shortness, 
-        swollen_legs, palpitations, foamy_urine, itchy_skin, muscle_cramps.
-        AND provide:
+        You are a health assistant for Indian conditions (urban and rural).
+        Extract 0 or 1 values for the symptoms below.
+        
+        CRITICAL: Provide ALL text-based fields (recommendation, future_risks, precautions, causes, reduction_steps, diet_plan) in {target_lang}.
+        
+        Symptoms to extract: thirst, urination, fatigue, chest_pain, dizziness, obesity, blurred_vision, slow_healing, numbness, breath_shortness, swollen_legs, palpitations, foamy_urine, itchy_skin, muscle_cramps.
+        
+        Fields to provide (in {target_lang}):
         1. 'recommendation': Specific advice (max 30 words).
-        2. 'future_risks': Potential complications if untreated (max 20 words).
-        3. 'precautions': Actionable steps to reduce risk (max 3 bullet points).
-        4. 'causes': Possible medical or lifestyle reasons for these symptoms (max 30 words).
-        5. 'reduction_steps': Specific medical/lifestyle steps to lower the diseases risk (max 3 bullet points).
-        6. 'diet_plan': Recommended foods to eat and avoid (max 30 words).
-        7. 'diabetes_risk': Estimated percentage (0-100) based ONLY on reported symptoms.
-        8. 'heart_risk': Estimated percentage (0-100) based ONLY on reported symptoms.
-        9. 'kidney_risk': Estimated percentage (0-100) based ONLY on reported symptoms.
+        2. 'future_risks': Potential complications (max 20 words).
+        3. 'precautions': Actionable steps (max 3 bullet points).
+        4. 'causes': Medical/lifestyle reasons (max 30 words).
+        5. 'reduction_steps': Steps to lower risk (max 3 bullet points).
+        6. 'diet_plan': Recommended foods (max 30 words).
+        7. 'diabetes_risk', 'heart_risk', 'kidney_risk': Percentages (0-100).
         
-        Text: {message}
-        Direct Answers: {q_text}
+        Input Text: {message}
+        Direct Symptoms: {q_text}
         
-        Return JSON object with all symptoms extracted and the advice keys.
+        Return JSON object with all symptoms and advice keys.
         """
 
         try:
             if client.api_key == "dummy-key":
                 import random
+                
+                # Mock localized advice
+                mock_advice = {
+                    "en-US": {
+                        "rec": "Based on your symptoms, consult a doctor immediately.",
+                        "risk": "Untreated symptoms may lead to chronic diseases.",
+                        "pre": "1. Better diet.\n2. Exercise.\n3. Regular monitoring.",
+                        "cause": "Lifestyle factors or genetic predisposition.",
+                        "red": "1. Healthy habits.\n2. Routine checks.",
+                        "diet": "Eat balanced, whole foods."
+                    },
+                    "hi-IN": {
+                        "rec": "आपके लक्षणों के आधार पर, तुरंत डॉक्टर से परामर्श लें।",
+                        "risk": "अनुपचारित लक्षणों से पुरानी बीमारियां हो सकती हैं।",
+                        "pre": "1. बेहतर आहार।\n2. व्यायाम।\n3. नियमित निगरानी।",
+                        "cause": "जीवनशैली के कारक या आनुवंशिक प्रवृत्ति।",
+                        "red": "1. स्वस्थ आदतें।\n2. नियमित जांच।",
+                        "diet": "संतुलित, संपूर्ण आहार लें।"
+                    },
+                    "te-IN": {
+                        "rec": "మీ లక్షణాల ఆధారంగా, వెంటనే వైద్యుడిని సంప్రదించండి.",
+                        "risk": "చికిత్స చేయని లక్షణాలు దీర్ఘకాలిక వ్యాధులకు దారితీయవచ్చు.",
+                        "pre": "1. మంచి ఆహారం.\n2. వ్యాయామం.\n3. క్రమం తప్పకుండా పర్యవేక్షణ.",
+                        "cause": "జీవనశైలి కారకాలు లేదా జన్యు సిద్ధత.",
+                        "red": "1. ఆరోగ్యకరమైన అలవాట్లు.\n2. క్రమం తప్పకుండా తనిఖీలు.",
+                        "diet": "సమతుల్యమైన, సంపూర్ణ ఆహారం తీసుకోండి."
+                    }
+                }
+                curr_advice = mock_advice.get(lang_code, mock_advice["en-US"])
+
                 symptoms = {
                     "thirst": q_data.get("thirst", random.choice([0, 1])),
                     "urination": q_data.get("urination", random.choice([0, 1])),
@@ -185,12 +228,12 @@ def predict():
                     "foamy_urine": q_data.get("foamy_urine", random.choice([0, 1])),
                     "itchy_skin": q_data.get("itchy_skin", random.choice([0, 1])),
                     "muscle_cramps": q_data.get("muscle_cramps", random.choice([0, 1])),
-                    "recommendation": "Based on your symptoms, consult a doctor immediately.",
-                    "future_risks": "Untreated symptoms may lead to chronic diseases.",
-                    "precautions": "1. Better diet.\n2. Exercise.\n3. Regular monitoring.",
-                    "causes": "Lifestyle factors or genetic predisposition.",
-                    "reduction_steps": "1. Healthy habits.\n2. Routine checks.",
-                    "diet_plan": "Eat balanced, whole foods.",
+                    "recommendation": curr_advice["rec"],
+                    "future_risks": curr_advice["risk"],
+                    "precautions": curr_advice["pre"],
+                    "causes": curr_advice["cause"],
+                    "reduction_steps": curr_advice["red"],
+                    "diet_plan": curr_advice["diet"],
                     "diabetes_risk": random.randint(30, 85) if any([q_data.get(k) for k in ["thirst", "urination", "blurred_vision"]]) else random.randint(5, 40),
                     "heart_risk": random.randint(30, 85) if any([q_data.get(k) for k in ["chest_pain", "breath_shortness"]]) else random.randint(5, 40),
                     "kidney_risk": random.randint(30, 85) if any([q_data.get(k) for k in ["fatigue", "foamy_urine"]]) else random.randint(5, 40)
@@ -281,7 +324,7 @@ def predict():
         if diabetes > 70 or heart > 70 or kidney > 70:
             user_entry = User.query.filter_by(username=session.get("user", "")).first()
             if user_entry and user_entry.phone:
-                send_risk_sms(user_entry.phone, diabetes, heart, kidney, record.id)
+                send_risk_sms(user_entry.phone, diabetes, heart, kidney, record.id, lang_code)
     except Exception as e:
         print(f"SMS Error: {e}")
     # -----------------------
@@ -302,7 +345,7 @@ def predict():
 
 # ---------------- SMS HELPER ----------------
 
-def send_risk_sms(to_number, diabetes, heart, kidney, record_id):
+def send_risk_sms(to_number, diabetes, heart, kidney, record_id, lang_code="en-US"):
     from twilio.rest import Client
     
     sid = app.config["TWILIO_ACCOUNT_SID"]
@@ -330,7 +373,12 @@ def send_risk_sms(to_number, diabetes, heart, kidney, record_id):
 
         report_link = f"{base_url}/report/{record_id}"
         
-        msg_body = f"HEALIX AI ALERT: High health risk detected: {', '.join(risks)}. View Report: {report_link}"
+        if lang_code == "hi-IN":
+            msg_body = f"हीलिक्स एआई अलर्ट: उच्च स्वास्थ्य जोखिम का पता चला है: {', '.join(risks)}। रिपोर्ट देखें: {report_link}"
+        elif lang_code == "te-IN":
+            msg_body = f"హీలిక్స్ AI అలర్ట్: అధిక ఆరోగ్య ప్రమాదం గుర్తించబడింది: {', '.join(risks)}. రిపోర్ట్ చూడండి: {report_link}"
+        else:
+            msg_body = f"HEALIX AI ALERT: High health risk detected: {', '.join(risks)}. View Report: {report_link}"
         
         message = client.messages.create(
             body=msg_body,
