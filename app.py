@@ -114,8 +114,25 @@ def predict():
     data = request.json
     message = data.get("message", "")
     
+    # Default values (average healthy adult)
+    features = {
+        "age": 45,
+        "bmi": 25,
+        "bp": 120,
+        "glucose": 100,
+        "chol": 180,
+        "max_heart_rate": 150
+    }
+
+    # Override defaults with manual inputs if present
+    for key in features.keys():
+        if key in data and data[key]:
+            try:
+                features[key] = float(data[key])
+            except ValueError:
+                pass # Keep default if conversion fails
+
     # If manual values are almost all default/missing, we imply we should use AI-driven estimation
-    # However, let's look at what's in 'data'
     has_manual = any(k in data and data[k] for k in ["age", "bmi", "bp", "glucose", "chol", "max_heart_rate"])
     
     # Extract questionnaire answers
@@ -134,14 +151,17 @@ def predict():
         1. 'recommendation': Specific advice (max 30 words).
         2. 'future_risks': Potential complications if untreated (max 20 words).
         3. 'precautions': Actionable steps to reduce risk (max 3 bullet points).
-        4. 'diabetes_risk': Estimated percentage (0-100) based ONLY on reported symptoms.
-        5. 'heart_risk': Estimated percentage (0-100) based ONLY on reported symptoms.
-        6. 'kidney_risk': Estimated percentage (0-100) based ONLY on reported symptoms.
+        4. 'causes': Possible medical or lifestyle reasons for these symptoms (max 30 words).
+        5. 'reduction_steps': Specific medical/lifestyle steps to lower the diseases risk (max 3 bullet points).
+        6. 'diet_plan': Recommended foods to eat and avoid (max 30 words).
+        7. 'diabetes_risk': Estimated percentage (0-100) based ONLY on reported symptoms.
+        8. 'heart_risk': Estimated percentage (0-100) based ONLY on reported symptoms.
+        9. 'kidney_risk': Estimated percentage (0-100) based ONLY on reported symptoms.
         
         Text: {message}
         Direct Answers: {q_text}
         
-        Return JSON object with keys: thirst, urination, fatigue, chest_pain, dizziness, obesity, recommendation, future_risks, precautions, diabetes_risk, heart_risk, kidney_risk.
+        Return JSON object with keys: thirst, urination, fatigue, chest_pain, dizziness, obesity, recommendation, future_risks, precautions, causes, reduction_steps, diet_plan, diabetes_risk, heart_risk, kidney_risk.
         """
 
         try:
@@ -157,6 +177,9 @@ def predict():
                     "recommendation": "Based on your symptoms, consult a doctor immediately.",
                     "future_risks": "Untreated symptoms may lead to chronic diabetes or heart failure.",
                     "precautions": "1. Reduce sugar intake.\n2. Exercise daily.\n3. Monitor BP.",
+                    "causes": "High sugar intake, lack of physical activity, or genetic predisposition.",
+                    "reduction_steps": "1. Low carb diet.\n2. Regular cardio.\n3. Routine checkups.",
+                    "diet_plan": "Eat leafy greens, whole grains. Avoid processed sugars and sodas.",
                     "diabetes_risk": random.randint(30, 85) if q_data.get("thirst") or q_data.get("urination") else random.randint(5, 40),
                     "heart_risk": random.randint(30, 85) if q_data.get("chest_pain") else random.randint(5, 40),
                     "kidney_risk": random.randint(30, 85) if q_data.get("fatigue") else random.randint(5, 40)
@@ -177,6 +200,10 @@ def predict():
             recommendation = symptoms.get("recommendation", recommendation)
             future_risks = symptoms.get("future_risks", "Potential health complications if untreated.")
             precautions = symptoms.get("precautions", "Consult a doctor for specific preventive measures.")
+            causes = symptoms.get("causes", "Lifestyle or biological factors.")
+            reduction_steps = symptoms.get("reduction_steps", "Medical management and lifestyle adjustments.")
+            diet_plan = symptoms.get("diet_plan", "Balanced nutrition based on risk levels.")
+
             ai_risks = {
                 "diabetes": symptoms.get("diabetes_risk", 0),
                 "heart": symptoms.get("heart_risk", 0),
@@ -201,6 +228,9 @@ def predict():
     else:
         future_risks = "Based on risk levels, untreated conditions may worsen."
         precautions = "Maintain a balanced diet and exercise regularly."
+        causes = "Further diagnosis required for specific causes."
+        reduction_steps = "Standard health optimization requested."
+        diet_plan = "Universal healthy diet recommended."
 
     # Prediction Logic Selection
     if not has_manual and ai_risks:
@@ -251,6 +281,9 @@ def predict():
         "recommendation": recommendation,
         "future_risks": future_risks,
         "precautions": precautions,
+        "causes": causes,
+        "reduction_steps": reduction_steps,
+        "diet_plan": diet_plan,
         "record_id": record.id
     })
 
@@ -359,16 +392,39 @@ def download_report():
     draw_risk_box(220, y, "Heart Risk", data.get("heart", 0))
     draw_risk_box(390, y, "Kidney Risk", data.get("kidney", 0))
 
-    # Disclaimer
+    # AI Details (Causes, Reduction, Diet)
     y -= 100
     c.setFont("Helvetica-Bold", 12)
-    c.drawString(50, y, "AI Recommendation:")
+    c.drawString(50, y, "Potential Causes:")
     c.setFont("Helvetica", 11)
-    # Simple text wrap logic or just truncate for now
+    causes_text = data.get("causes", "N/A")
+    c.drawString(50, y-15, causes_text[:90])
+    if len(causes_text) > 90: c.drawString(50, y-30, causes_text[90:180])
+    
+    y -= 50
+    c.setFont("Helvetica-Bold", 12)
+    c.drawString(50, y, "How to Reduce Risk:")
+    c.setFont("Helvetica", 11)
+    reduction_text = data.get("reduction_steps", "N/A")
+    lines = reduction_text.split('\n')
+    for i, line in enumerate(lines[:3]):
+        c.drawString(50, y - 15 - (i*15), line[:90])
+    
+    y -= 65
+    c.setFont("Helvetica-Bold", 12)
+    c.drawString(50, y, "Recommended Dietary Plan:")
+    c.setFont("Helvetica", 11)
+    diet_text = data.get("diet_plan", "N/A")
+    c.drawString(50, y-15, diet_text[:90])
+    if len(diet_text) > 90: c.drawString(50, y-30, diet_text[90:180])
+
+    y -= 50
+    c.setFont("Helvetica-Bold", 12)
+    c.drawString(50, y, "General Recommendations:")
+    c.setFont("Helvetica", 11)
     rec_text = data.get("recommendation", "N/A")
-    c.drawString(50, y-20, rec_text[:90]) # First line
-    if len(rec_text) > 90:
-         c.drawString(50, y-35, rec_text[90:])
+    c.drawString(50, y-15, rec_text[:90])
+    if len(rec_text) > 90: c.drawString(50, y-30, rec_text[90:180])
 
     y -= 60
     c.setFont("Helvetica-Oblique", 10)

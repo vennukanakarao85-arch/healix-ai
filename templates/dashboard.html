@@ -301,6 +301,33 @@
         </div>
     </div>
 
+    <!-- Causes Section -->
+    <div class="advice-box" style="border-left: 4px solid var(--accent); background: rgba(0, 243, 255, 0.1); margin-top: 10px;">
+        <div style="font-size:24px;">🔍</div>
+        <div class="advice-content">
+            <h4 style="color: var(--accent);">Potential Causes:</h4>
+            <p>${data.causes || "Lifestyle or biological factors."}</p>
+        </div>
+    </div>
+
+    <!-- Reduction Steps Section -->
+    <div class="advice-box" style="border-left: 4px solid #f59e0b; background: rgba(245, 158, 11, 0.1); margin-top: 10px;">
+        <div style="font-size:24px;">📉</div>
+        <div class="advice-content">
+            <h4 style="color: #f59e0b;">Steps to Reduce Risk:</h4>
+            <p style="white-space: pre-line;">${data.reduction_steps || "Consult a doctor for management."}</p>
+        </div>
+    </div>
+
+    <!-- Diet Plan Section -->
+    <div class="advice-box" style="border-left: 4px solid #8b5cf6; background: rgba(139, 92, 246, 0.1); margin-top: 10px;">
+        <div style="font-size:24px;">🥗</div>
+        <div class="advice-content">
+            <h4 style="color: #8b5cf6;">Recommended Dietary Plan:</h4>
+            <p>${data.diet_plan || "Balanced nutrition based on risk levels."}</p>
+        </div>
+    </div>
+
     <!-- Precautions Section -->
     <div class="advice-box" style="border-left: 4px solid #10b981; background: rgba(16, 185, 129, 0.1); margin-top: 10px;">
         <div style="font-size:24px;">🛡️</div>
