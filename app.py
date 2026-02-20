@@ -146,7 +146,9 @@ def predict():
         q_text = ", ".join([f"{k}: {'Yes' if v == 1 else 'No'}" for k, v in q_data.items()])
         prompt = f"""
         Extract 0 or 1 values for:
-        thirst, urination, fatigue, chest_pain, dizziness, obesity.
+        thirst, urination, fatigue, chest_pain, dizziness, obesity, 
+        blurred_vision, slow_healing, numbness, breath_shortness, 
+        swollen_legs, palpitations, foamy_urine, itchy_skin, muscle_cramps.
         AND provide:
         1. 'recommendation': Specific advice (max 30 words).
         2. 'future_risks': Potential complications if untreated (max 20 words).
@@ -161,7 +163,7 @@ def predict():
         Text: {message}
         Direct Answers: {q_text}
         
-        Return JSON object with keys: thirst, urination, fatigue, chest_pain, dizziness, obesity, recommendation, future_risks, precautions, causes, reduction_steps, diet_plan, diabetes_risk, heart_risk, kidney_risk.
+        Return JSON object with all symptoms extracted and the advice keys.
         """
 
         try:
@@ -174,28 +176,33 @@ def predict():
                     "chest_pain": q_data.get("chest_pain", random.choice([0, 1])),
                     "dizziness": q_data.get("dizziness", random.choice([0, 1])),
                     "obesity": q_data.get("obesity", random.choice([0, 1])),
+                    "blurred_vision": q_data.get("blurred_vision", random.choice([0, 1])),
+                    "slow_healing": q_data.get("slow_healing", random.choice([0, 1])),
+                    "numbness": q_data.get("numbness", random.choice([0, 1])),
+                    "breath_shortness": q_data.get("breath_shortness", random.choice([0, 1])),
+                    "swollen_legs": q_data.get("swollen_legs", random.choice([0, 1])),
+                    "palpitations": q_data.get("palpitations", random.choice([0, 1])),
+                    "foamy_urine": q_data.get("foamy_urine", random.choice([0, 1])),
+                    "itchy_skin": q_data.get("itchy_skin", random.choice([0, 1])),
+                    "muscle_cramps": q_data.get("muscle_cramps", random.choice([0, 1])),
                     "recommendation": "Based on your symptoms, consult a doctor immediately.",
-                    "future_risks": "Untreated symptoms may lead to chronic diabetes or heart failure.",
-                    "precautions": "1. Reduce sugar intake.\n2. Exercise daily.\n3. Monitor BP.",
-                    "causes": "High sugar intake, lack of physical activity, or genetic predisposition.",
-                    "reduction_steps": "1. Low carb diet.\n2. Regular cardio.\n3. Routine checkups.",
-                    "diet_plan": "Eat leafy greens, whole grains. Avoid processed sugars and sodas.",
-                    "diabetes_risk": random.randint(30, 85) if q_data.get("thirst") or q_data.get("urination") else random.randint(5, 40),
-                    "heart_risk": random.randint(30, 85) if q_data.get("chest_pain") else random.randint(5, 40),
-                    "kidney_risk": random.randint(30, 85) if q_data.get("fatigue") else random.randint(5, 40)
+                    "future_risks": "Untreated symptoms may lead to chronic diseases.",
+                    "precautions": "1. Better diet.\n2. Exercise.\n3. Regular monitoring.",
+                    "causes": "Lifestyle factors or genetic predisposition.",
+                    "reduction_steps": "1. Healthy habits.\n2. Routine checks.",
+                    "diet_plan": "Eat balanced, whole foods.",
+                    "diabetes_risk": random.randint(30, 85) if any([q_data.get(k) for k in ["thirst", "urination", "blurred_vision"]]) else random.randint(5, 40),
+                    "heart_risk": random.randint(30, 85) if any([q_data.get(k) for k in ["chest_pain", "breath_shortness"]]) else random.randint(5, 40),
+                    "kidney_risk": random.randint(30, 85) if any([q_data.get(k) for k in ["fatigue", "foamy_urine"]]) else random.randint(5, 40)
                 }
             else:
                 response = client.chat.completions.create(
                     model="gpt-4o-mini",
-                    messages=[{"role":"user","content":prompt}]
+                    messages=[{"role":"user","content":prompt}],
+                    response_format={ "type": "json_object" }
                 )
                 import json
-                content = response.choices[0].message.content
-                if "```json" in content:
-                    content = content.split("```json")[1].split("```")[0].strip()
-                elif "```" in content:
-                    content = content.split("```")[1].strip()
-                symptoms = json.loads(content)
+                symptoms = json.loads(response.choices[0].message.content)
             
             recommendation = symptoms.get("recommendation", recommendation)
             future_risks = symptoms.get("future_risks", "Potential health complications if untreated.")
@@ -212,13 +219,19 @@ def predict():
 
             # Adjust values based on symptoms (For traditional models)
             if "glucose" not in data or not data["glucose"]:
-                if symptoms.get("thirst"): features["glucose"] += 30
-                if symptoms.get("urination"): features["glucose"] += 30
-                if symptoms.get("fatigue"): features["glucose"] += 20
+                if symptoms.get("thirst"): features["glucose"] += 20
+                if symptoms.get("urination"): features["glucose"] += 20
+                if symptoms.get("blurred_vision"): features["glucose"] += 20
+                if symptoms.get("slow_healing"): features["glucose"] += 20
             
+            if "bp" not in data or not data["bp"]:
+                if symptoms.get("breath_shortness"): features["bp"] += 10
+                if symptoms.get("swollen_legs"): features["bp"] += 10
+
             if "max_heart_rate" not in data or not data["max_heart_rate"]:
-                if symptoms.get("chest_pain"): features["max_heart_rate"] += 40
-                if symptoms.get("dizziness"): features["max_heart_rate"] += 20
+                if symptoms.get("chest_pain"): features["max_heart_rate"] += 30
+                if symptoms.get("palpitations"): features["max_heart_rate"] += 30
+                if symptoms.get("breath_shortness"): features["max_heart_rate"] += 20
 
             if "bmi" not in data or not data["bmi"]:
                 if symptoms.get("obesity"): features["bmi"] += 10
